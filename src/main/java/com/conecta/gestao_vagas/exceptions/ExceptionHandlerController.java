@@ -2,6 +2,7 @@ package com.conecta.gestao_vagas.exceptions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -22,7 +23,8 @@ public class ExceptionHandlerController {
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<List<ErrorMessageDTO>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+  public ResponseEntity<Map<String, List<ErrorMessageDTO>>> handleMethodArgumentNotValidException(
+      MethodArgumentNotValidException e) {
     List<ErrorMessageDTO> dto = new ArrayList<>();
 
     e.getBindingResult().getFieldErrors().forEach(err -> {
@@ -32,6 +34,9 @@ public class ExceptionHandlerController {
       dto.add(error);
     });
 
-    return new ResponseEntity<>(dto, HttpStatus.BAD_REQUEST);
+    return new ResponseEntity<>(wrapErrors(dto), HttpStatus.BAD_REQUEST);
   }
+    private Map<String, List<ErrorMessageDTO>> wrapErrors(List<ErrorMessageDTO> errors) {
+        return Map.of("errors", errors);
+    }
 }
